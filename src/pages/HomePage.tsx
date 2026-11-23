@@ -1,12 +1,19 @@
-import { MainButton, SecondaryButton } from "../components/TrustUI";
+import { MainButton } from "../components/TrustUI";
 
-function HomePage({ pageData }: { pageData: any }) {
-  const defaultData = {
+type HomePageProps = {
+  pageData?: {
+    tagline?: string;
+    buttons?: Array<{ id?: string; label: string; href: string }>;
+  };
+};
+
+function HomePage({ pageData }: HomePageProps) {
+  const defaultData: NonNullable<HomePageProps["pageData"]> = {
     tagline: "Smarter Sourcing, Stronger Businesses.",
     buttons: [
       { label: "Verify Us", href: "/verified-documents" },
       { label: "Our Socials", href: "/socials" },
-    ]
+    ],
   };
   const data = pageData || defaultData;
 
@@ -25,7 +32,7 @@ function HomePage({ pageData }: { pageData: any }) {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {data?.buttons?.map((button) => (
             <MainButton
-              key={button.id}
+              key={button.id ?? button.href}
               href={button.href}
               className="py-3 px-6 text-lg"
             >
