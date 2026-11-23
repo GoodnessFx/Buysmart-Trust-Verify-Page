@@ -12,8 +12,6 @@ function HomePage({ pageData }: { pageData: any }) {
 
   return (
     <div className="min-h-screen bg-[color:var(--fallback-canvas-color,_#FAFAF8)] font-inter">
-      <Header />
-
       <main className="max-w-7xl mx-auto py-12">
         <header className="text-center mb-12">
           <div className="w-24 h-24 bg-[color:var(--primary-gold,_#C7961A)] rounded-md flex items-center justify-center mx-auto mb-4">
@@ -36,8 +34,6 @@ function HomePage({ pageData }: { pageData: any }) {
           ))}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

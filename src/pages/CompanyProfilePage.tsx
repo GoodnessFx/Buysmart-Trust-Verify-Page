@@ -7,8 +7,6 @@ function CompanyProfilePage({ pageData }: { pageData: any }) {
 
   return (
     <div className="min-h-screen bg-[color:var(--fallback-canvas-color,_#FAFAF8)] font-inter">
-      <Header />
-
       <main className="max-w-7xl mx-auto py-12">
         <section className="mb-12">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -78,8 +76,6 @@ function CompanyProfilePage({ pageData }: { pageData: any }) {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

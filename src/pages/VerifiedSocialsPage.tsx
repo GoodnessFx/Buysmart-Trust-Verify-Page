@@ -1,5 +1,4 @@
 import { MainButton } from "../components/TrustUI";
-import { schemaOrgOrganization } from "../lib/schema";
 
 function VerifiedSocialsPage() {
   const platforms = [
@@ -11,8 +10,6 @@ function VerifiedSocialsPage() {
 
   return (
     <div className="min-h-screen bg-[color:var(--fallback-canvas-color,_#FAFAF8)] font-inter">
-      <Header />
-
       <main className="max-w-7xl mx-auto py-12">
         <section className="mb-12">
           <div className="bg-white rounded-lg p-8 md:p-12 text-center max-w-2xl mx-auto mb-8">
@@ -46,8 +43,6 @@ function VerifiedSocialsPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

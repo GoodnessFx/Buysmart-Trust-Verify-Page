@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { MainButton, SecondaryButton } from "./components/TrustUI";
+import { MainButton, SecondaryButton, Footer, ShareButton, QRCode } from "./components/TrustUI";
 import { Header } from "./layout/Header";
-import { ShareButton, QRCode } from "./components/TrustUI";
 import { schemaOrgOrganization } from "./lib/schema";
 import content from "./content.json";
 import HomePage from "./pages/HomePage";
@@ -40,7 +39,7 @@ function App() {
     <div className="min-h-screen bg-[color:var(--fallback-canvas-color,_#FAFAF8)] font-inter">
       <Header currentPath={currentPath} onNavigate={navigate} />
       <PageComponent {...pageData} />
-      <Footer currentPath={currentPath} onNavigate={navigate} />
+      <Footer />
       <ShareButton url={window.location.href} />
       <QRCode url={window.location.href} />
     </div>

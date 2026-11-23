@@ -11,8 +11,6 @@ function GoogleBusinessPage({ pageData }: { pageData: any }) {
 
   return (
     <div className="min-h-screen bg-[color:var(--fallback-canvas-color,_#FAFAF8)] font-inter">
-      <Header />
-
       <main className="max-w-7xl mx-auto py-12">
         <section className="mb-12">
           <div className="bg-white rounded-lg p-8 md:p-12 text-center max-w-2xl mx-auto mb-8">
@@ -69,8 +67,6 @@ function GoogleBusinessPage({ pageData }: { pageData: any }) {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

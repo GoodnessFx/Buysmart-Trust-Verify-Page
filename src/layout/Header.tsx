@@ -1,5 +1,4 @@
-import { useNavigate } from "react-router-dom";
-import { MainButton, SecondaryButton } from "../components/TrustUI";
+import { Logo, MainButton, SecondaryButton } from "../components/TrustUI";
 
 export function Header({ currentPath, onNavigate, onRequestQuote }: {
   currentPath: string;
@@ -9,10 +8,10 @@ export function Header({ currentPath, onNavigate, onRequestQuote }: {
   const navigate = onNavigate;
 
   return (
-    <header className="bg-white border-b border-border sticky top-0 z-10 bg-opacity-90 backdrop-blur-sm">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-10 bg-opacity-90 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
         <div className="flex items-center gap-3">
-          <Logo size="xl" />
+          <Logo />
           <span className="text-xl font-bold text-[color:var(--primary-charcoal,_#0D0D0D)]">
             BuySmart
           </span>
