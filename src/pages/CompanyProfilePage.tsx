@@ -1,4 +1,3 @@
-import { useContent } from "../hooks/useContent";
 import { MainButton, SecondaryButton } from "../components/TrustUI";
 
 function CompanyProfilePage() {
