@@ -1,0 +1,10 @@
+{
+  "description": "A mobile-friendly trust hub for BuySmart Procurement Limited, helping customers verify company details, view documents, find official links, and request quotes.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
