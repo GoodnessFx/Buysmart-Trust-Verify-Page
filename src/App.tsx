@@ -4,11 +4,12 @@ import { Header } from "./layout/Header";
 import { ShareButton, QRCode } from "./components/TrustUI";
 import { schemaOrgOrganization } from "./lib/schema";
 import content from "./content.json";
-import { VerifiedDocumentsPage } from "./pages/VerifiedDocumentsPage";
-import { VerifiedSocialsPage } from "./pages/VerifiedSocialsPage";
-import { GoogleBusinessPage } from "./pages/GoogleBusinessPage";
-import { CompanyProfilePage } from "./pages/CompanyProfilePage";
-import { HomePage } from "./pages/HomePage";
+import HomePage from "./pages/HomePage";
+import VerifiedDocumentsPage from "./pages/VerifiedDocumentsPage";
+import VerifiedSocialsPage from "./pages/VerifiedSocialsPage";
+import GoogleBusinessPage from "./pages/GoogleBusinessPage";
+import CompanyProfilePage from "./pages/CompanyProfilePage";
+import ContactPage from "./pages/ContactPage";
 
 function App() {
   const [currentPath, setCurrentPath] = useState("/");
