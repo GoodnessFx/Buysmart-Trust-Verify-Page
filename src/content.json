@@ -8,13 +8,14 @@
     "author": "BuySmart Procurement Limited",
     "companyName": "BuySmart Procurement Limited",
     "registrationNumber": "9613952",
-    "lastUpdated": "9 July 2026"
+    "lastUpdated": "24 November 2026"
   },
   "rcNumber": "9613952",
   "registration": {
     "cacNumber": "9613952",
     "registered": "CAC Nigeria",
-    "address": "6 Bassey Street, Egbeda, Lagos 100276, Nigeria",
+    "incorporated": "16 June 2026",
+    "address": "18 Bassey Street, Egbeda, Lagos, Nigeria",
     "phone": "0810 013 0714",
     "email": "buysmartprocurementlimited@gmail.com"
   },
@@ -43,12 +44,14 @@
   },
   "links": {
     "website": "https://www.buysmartprocurement.com",
-    "cacSearch": "https://search.cac.gov.ng",
+    "cacSearch": "https://icrp.cac.gov.ng/public-search/",
     "cacWebsite": "https://www.cac.gov.ng/",
+    "cacStampVerification": "https://www.stampduty.gov.ng/verification",
+    "taxVerification": "https://taxid.nrs.gov.ng/",
     "instagram": "https://www.instagram.com/buysmartprocurementltd/",
     "facebook": "https://www.facebook.com/buysmartprocurementltd",
     "linkedin": "https://www.linkedin.com/company/buysmartprocurementltd/",
-    "directions": "https://www.google.com/maps/dir/?api=1&destination=6+Bassey+Street%2C+Egbeda%2C+Lagos+100276%2C+Nigeria",
+    "directions": "https://www.google.com/maps/dir/?api=1&destination=18+Bassey+Street%2C+Egbeda%2C+Lagos%2C+Nigeria",
     "whatsapp": "https://wa.me/2348100130714?text=Hello%2C%20I%20would%20like%20a%20quote.",
     "phone": "tel:+2348100130714",
     "email": "mailto:buysmartprocurementlimited@gmail.com"
@@ -56,7 +59,7 @@
   "contact": {
     "phone": "0810 013 0714",
     "email": "buysmartprocurementlimited@gmail.com",
-    "address": "6 Bassey Street, Egbeda, Lagos 100276, Nigeria",
+    "address": "18 Bassey Street, Egbeda, Lagos, Nigeria",
     "hours": "Opening hours pending confirmation"
   },
   "socials": [
@@ -78,98 +81,6 @@
   ],
   "documents": [
     {
-      "id": "cac-certificate",
-      "title": "CAC Certificate of Incorporation",
-      "purpose": "Shows the company's legal registration in Nigeria.",
-      "issuerName": "Corporate Affairs Commission, Nigeria",
-      "issuerCode": "CAC",
-      "status": "pending",
-      "lastUpdated": "File pending",
-      "file": "",
-      "thumbnail": "",
-      "fileSize": "",
-      "pages": 0,
-      "officialUrl": "https://search.cac.gov.ng",
-      "details": [
-        { "label": "Registered name", "value": "BuySmart Procurement Limited" },
-        { "label": "Company type", "value": "Private Limited Liability Company" },
-        { "label": "RC number", "value": "9613952" },
-        { "label": "Incorporated", "value": "May 2026 — exact date pending certificate" },
-        { "label": "Head office", "value": "Lagos, Nigeria" }
-      ],
-      "notice": "File pending"
-    },
-    {
-      "id": "trademark-certificate",
-      "title": "Trademark Certificate",
-      "purpose": "Will show the registered mark details once the certificate is supplied.",
-      "issuerName": "Trademark registry",
-      "issuerCode": "TM",
-      "status": "pending",
-      "lastUpdated": "File pending",
-      "file": "",
-      "thumbnail": "",
-      "fileSize": "",
-      "pages": 0,
-      "officialUrl": "",
-      "details": [],
-      "notice": "Mark name, class, certificate number and date are pending. No official registry verification link has been provided."
-    },
-    {
-      "id": "tax-registration",
-      "title": "Tax Registration (TIN)",
-      "purpose": "Will show the company's tax registration details if approved for public release.",
-      "issuerName": "Tax registration record",
-      "issuerCode": "TIN",
-      "status": "pending",
-      "lastUpdated": "File pending",
-      "file": "",
-      "thumbnail": "",
-      "fileSize": "",
-      "pages": 0,
-      "officialUrl": "",
-      "details": [],
-      "notice": "This optional record has not been supplied or approved for public display."
-    },
-    {
-      "id": "hse-training",
-      "title": "Leadership training — HSE",
-      "purpose": "An individual professional training record issued through the Institute of Safety Professionals of Nigeria.",
-      "issuerName": "Institute of Safety Professionals of Nigeria",
-      "issuerCode": "ISPN",
-      "status": "pending",
-      "lastUpdated": "File pending",
-      "file": "",
-      "thumbnail": "",
-      "fileSize": "",
-      "pages": 0,
-      "officialUrl": "",
-      "details": [
-        { "label": "Training area", "value": "Health, Safety and Environment (HSE)" },
-        { "label": "Issuer", "value": "Institute of Safety Professionals of Nigeria" }
-      ],
-      "notice": "The certificate and a public issuer verification link have not been supplied."
-    },
-    {
-      "id": "internal-auditor-training",
-      "title": "Leadership training — ISO 9001:2015 Internal Auditor",
-      "purpose": "An individual professional internal auditor training record issued through QESH Standards Limited.",
-      "issuerName": "QESH Standards Limited",
-      "issuerCode": "QESH",
-      "status": "pending",
-      "lastUpdated": "File pending",
-      "file": "",
-      "thumbnail": "",
-      "fileSize": "",
-      "pages": 0,
-      "officialUrl": "",
-      "details": [
-        { "label": "Training area", "value": "ISO 9001:2015 Internal Auditor" },
-        { "label": "Issuer", "value": "QESH Standards Limited" }
-      ],
-      "notice": "This is a leadership training record. It does not state or imply that BuySmart or its processes are ISO certified."
-    },
-    {
       "id": "profile",
       "title": "Company Profile",
       "purpose": "An overview of BuySmart, its procurement services, values and approach.",
@@ -182,24 +93,34 @@
       "fileSize": "275 KB",
       "pages": 18,
       "officialUrl": "",
+      "officialSourceName": "",
+      "verificationHint": "",
       "details": [],
       "notice": ""
     },
     {
-      "id": "capability-statement",
-      "title": "Industrial and Oil and Gas Capability Statement",
-      "purpose": "Outlines our intended procurement capabilities for industrial and oil and gas projects.",
-      "issuerName": "BuySmart Procurement Limited",
-      "issuerCode": "O&G",
-      "status": "pending",
-      "lastUpdated": "File pending",
-      "file": "",
+      "id": "tax-registration",
+      "title": "Tax Identification Certificate",
+      "purpose": "Official taxpayer identification record for BuySmart Procurement Ltd.",
+      "issuerName": "Nigeria Revenue Service",
+      "issuerCode": "NRS",
+      "status": "published",
+      "lastUpdated": "20 June 2026",
+      "file": "/documents/BUYSMART_TAX_ID_CERTIFICATE.pdf",
       "thumbnail": "",
-      "fileSize": "",
-      "pages": 18,
-      "officialUrl": "",
-      "details": [],
-      "notice": "Publication is on hold. The unsupported \u201c99.9% Oil and Gas Procurement Capability\u201d and \u201c24/7\u201d cover claims must be removed before this document can be published."
+      "fileSize": "899 KB",
+      "pages": 1,
+      "officialUrl": "https://taxid.nrs.gov.ng/",
+      "officialSourceName": "Official NRS Tax ID verification",
+      "verificationHint": "Choose Registered Organizations and use CAC RC 9613952 to retrieve and compare the Tax ID.",
+      "details": [
+        { "label": "Taxpayer name", "value": "BUYSMART PROCUREMENT LTD" },
+        { "label": "Tax ID", "value": "2622478418022" },
+        { "label": "Tax authority", "value": "Nigeria Revenue Service" },
+        { "label": "Date of issue", "value": "20 June 2026" },
+        { "label": "Address", "value": "18, Bassey Street, Egbeda, Alimosho, Lagos, Nigeria" }
+      ],
+      "notice": ""
     },
     {
       "id": "policy",
@@ -214,6 +135,8 @@
       "fileSize": "1001 KB",
       "pages": 4,
       "officialUrl": "",
+      "officialSourceName": "",
+      "verificationHint": "",
       "details": [],
       "notice": "This is the updated policy file containing the company email address."
     }

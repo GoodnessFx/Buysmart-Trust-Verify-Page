@@ -49,8 +49,11 @@ function getUrlHost(url: string) {
 }
 
 function isCacSource(document: DocumentEntry) {
-  return Boolean(document.officialUrl) && getUrlHost(document.officialUrl) === "search.cac.gov.ng";
+  const host = getUrlHost(document.officialUrl);
+  return host === "icrp.cac.gov.ng" || host === "search.cac.gov.ng";
 }
+
+const cacSearchHost = getUrlHost(content.links.cacSearch);
 
 const icons: Record<IconName, ReactNode> = {
   arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
@@ -157,7 +160,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     if (finishing.current) return;
     finishing.current = true;
     setLeaving(true);
-    exitTimer.current = window.setTimeout(onComplete, 450);
+    exitTimer.current = window.setTimeout(onComplete, 300);
   }, [onComplete]);
 
   useEffect(() => {
@@ -165,7 +168,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    startTimer.current = window.setTimeout(finish, reducedMotion ? 900 : 2600);
+    startTimer.current = window.setTimeout(finish, reducedMotion ? 700 : 1800);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") finish();
@@ -189,30 +192,12 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
       aria-describedby="splash-description"
     >
       <div className="splash__content">
-        <div className="splash__brand">
-          <img src="/images/buysmart-mark.webp" alt="" />
-          <div>
-            <span className="splash__name">BuySmart</span>
-            <span className="splash__wordmark">PROCUREMENT LIMITED</span>
-          </div>
-        </div>
-        <p className="splash__eyebrow">Official trust centre</p>
-        <h1 id="splash-title">Verify with confidence.</h1>
-        <p className="splash__description" id="splash-description">
-          Review our public documents, open the official source and complete your own check before
-          you transact.
-        </p>
-        <div className="splash__registration">
-          <Icon name="shield" size={17} />
-          CAC registered · RC {content.site.registrationNumber}
-        </div>
-        <div className="splash__progress" aria-hidden="true">
-          <span />
-        </div>
+        <img className="splash__mark" src="/images/buysmart-mark.webp" alt="BuySmart logo" />
+        <h1 id="splash-title">BuySmart</h1>
+        <p id="splash-description">Official trust centre</p>
         <button className="splash__enter" type="button" onClick={finish} ref={enterButton}>
-          Enter trust centre <Icon name="arrow" size={18} />
+          Enter <Icon name="arrow" size={18} />
         </button>
-        <small>Taking you to the trust centre…</small>
       </div>
     </div>
   );
@@ -351,7 +336,7 @@ function HomePage() {
           <Icon name="building" size={17} />
           <span>CAC Nigeria · RC {content.site.registrationNumber}</span>
           <a href={content.links.cacSearch} target="_blank" rel="noreferrer">
-            search.cac.gov.ng
+            {cacSearchHost}
           </a>
         </div>
       </section>
@@ -425,7 +410,11 @@ function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
     >
       <div className="verification-panel__heading">
         <span className="verification-panel__icon">
-          <Icon name="shield" size={25} />
+          <img
+            className="cac-logo"
+            src="https://www.cac.gov.ng/images/coat-of-arms.png"
+            alt="Corporate Affairs Commission logo"
+          />
         </span>
         <div>
           <p className="eyebrow">Official company check</p>
@@ -447,7 +436,7 @@ function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
             <span>2</span>
             <div>
               <strong>Open the official CAC search</strong>
-              <p>The independent government source is search.cac.gov.ng.</p>
+              <p>The independent government source is {cacSearchHost}.</p>
             </div>
           </li>
           <li>
@@ -473,6 +462,9 @@ function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
           <CopyButton value={content.site.companyName} />
           <CopyButton value={content.site.registrationNumber} />
         </div>
+        <p className="verification-panel__record">
+          Registered {content.registration.incorporated} · {content.registration.address}
+        </p>
       </div>
 
       {compact && (
@@ -490,7 +482,7 @@ function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
         >
           <span>
             Open official CAC search
-            <small>search.cac.gov.ng</small>
+            <small>{cacSearchHost}</small>
           </span>
           <Icon name="arrow" size={18} />
         </a>
@@ -505,14 +497,22 @@ function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
         <Icon name="globe" size={15} />
         Independent government source ·{" "}
         <a href={content.links.cacSearch} target="_blank" rel="noreferrer">
-          search.cac.gov.ng
+          {cacSearchHost}
         </a>
       </p>
+      <a
+        className="verification-panel__secondary"
+        href={content.links.cacStampVerification}
+        target="_blank"
+        rel="noreferrer"
+      >
+        Verify a CAC electronic stamp <Icon name="arrow" size={15} />
+      </a>
     </section>
   );
 }
 
-function CopyButton({ value }: { value: string }) {
+function CopyButton({ value, compact = false }: { value: string; compact?: boolean }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -527,13 +527,23 @@ function CopyButton({ value }: { value: string }) {
   }
 
   return (
-    <button className="copy-button" onClick={copy} type="button">
-      <span>{value}</span>
-      <span className="copy-button__action">
-        <Icon name="copy" size={16} />
-        {copied ? "Copied" : "Copy"}
+    <>
+      <button
+        className={`copy-button ${compact ? "copy-button--compact" : ""}`}
+        onClick={copy}
+        type="button"
+        aria-label={compact ? `Copy ${value}` : undefined}
+      >
+        {!compact && <span>{value}</span>}
+        <span className="copy-button__action">
+          <Icon name="copy" size={16} />
+          {copied ? "Copied" : "Copy"}
+        </span>
+      </button>
+      <span className="sr-only" role="status" aria-live="polite">
+        {copied ? `${value} copied` : ""}
       </span>
-    </button>
+    </>
   );
 }
 
@@ -630,9 +640,10 @@ function OfficialSourceLink({ document }: { document: DocumentEntry }) {
       <span className="official-source__copy">
         <small>
           {isOfficialRegistry
-            ? isCacSource(document)
-              ? "Official CAC verification"
-              : "Official registry verification"
+            ? document.officialSourceName ||
+              (isCacSource(document)
+                ? "Official CAC verification"
+                : "Official registry verification")
             : "Official company website"}
         </small>
         <strong>{sourceHost}</strong>
@@ -645,6 +656,12 @@ function OfficialSourceLink({ document }: { document: DocumentEntry }) {
 function DocumentSteps({ document }: { document: DocumentEntry }) {
   const hasOfficialRegistry = Boolean(document.officialUrl);
   const cacSource = isCacSource(document);
+  const officialCheckDescription = hasOfficialRegistry
+    ? document.verificationHint ||
+      (cacSource
+        ? "Search CAC with our name or RC number, then compare the record."
+        : "Open the official registry and compare the record.")
+    : "Use our official website to compare the company name and contact details.";
 
   return (
     <ol className="document-steps" aria-label={`How to review ${document.title}`}>
@@ -652,7 +669,10 @@ function DocumentSteps({ document }: { document: DocumentEntry }) {
         <span>1</span>
         <div>
           <strong>Open or download the PDF</strong>
-          <p>Review all {document.pages} pages before you continue.</p>
+          <p>
+            Review {document.pages === 1 ? "the page" : `all ${document.pages} pages`} before you
+            continue.
+          </p>
         </div>
       </li>
       <li>
@@ -661,13 +681,7 @@ function DocumentSteps({ document }: { document: DocumentEntry }) {
           <strong>
             {hasOfficialRegistry ? "Check the official record" : "Compare the company details"}
           </strong>
-          <p>
-            {hasOfficialRegistry
-              ? cacSource
-                ? "Search CAC with our name or RC number, then compare the record."
-                : "Open the official registry and compare the record."
-              : "Use our official website to compare the company name and contact details."}
-          </p>
+          <p>{officialCheckDescription}</p>
         </div>
       </li>
       <li>
@@ -688,12 +702,22 @@ function DocumentCard({ document }: { document: DocumentEntry }) {
     <article className="document-card" id={document.id}>
       <div className="document-preview">
         <img className="document-preview__watermark" src="/images/buysmart-mark.webp" alt="" />
-        <img src={document.thumbnail} alt={`First page of ${document.title}`} loading="lazy" />
+        {document.thumbnail ? (
+          <img src={document.thumbnail} alt={`First page of ${document.title}`} loading="lazy" />
+        ) : (
+          <div className="document-preview__placeholder" aria-hidden="true">
+            <span>{document.issuerCode}</span>
+            <strong>PDF</strong>
+            <small>Public document</small>
+          </div>
+        )}
         <span className="document-preview__issuer">
           <span>{document.issuerCode}</span>
           {document.issuerName}
         </span>
-        <span className="page-count">{document.pages} pages</span>
+        <span className="page-count">
+          {document.pages} {document.pages === 1 ? "page" : "pages"}
+        </span>
       </div>
       <div className="document-card__body">
         <div className="badge-row">
@@ -705,6 +729,25 @@ function DocumentCard({ document }: { document: DocumentEntry }) {
         <h2>{document.title}</h2>
         <p className="document-purpose">{document.purpose}</p>
         {document.notice && <p className="document-notice">{document.notice}</p>}
+        {document.details.length > 0 && (
+          <dl className="document-details">
+            {document.details.map((detail) => (
+              <div key={detail.label}>
+                <dt>{detail.label}</dt>
+                <dd>
+                  {detail.label === "Tax ID" ? (
+                    <span className="document-details__value">
+                      <span>{detail.value}</span>
+                      <CopyButton value={detail.value} compact />
+                    </span>
+                  ) : (
+                    detail.value
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
         <DocumentSteps document={document} />
         <OfficialSourceLink document={document} />
         <div className="file-meta">
@@ -736,34 +779,11 @@ function DocumentCard({ document }: { document: DocumentEntry }) {
   );
 }
 
-function PendingDocumentCard({ document }: { document: DocumentEntry }) {
-  return (
-    <article className="pending-document" id={document.id}>
-      <span className="pending-document__mark" aria-hidden="true">
-        {document.issuerCode}
-      </span>
-      <div className="pending-document__body">
-        <div className="badge-row">
-          <span className="pending-badge">File pending</span>
-          {document.officialUrl && (
-            <span className="status-badge status-badge--official">Official check available</span>
-          )}
-        </div>
-        <h3>{document.title}</h3>
-        <p>{document.purpose}</p>
-        {document.notice && <p className="pending-document__notice">{document.notice}</p>}
-        {document.officialUrl && <OfficialSourceLink document={document} />}
-      </div>
-    </article>
-  );
-}
-
 function DocumentsPage({ focus }: { focus?: string }) {
   const documents = focus
     ? content.documents.filter((document) => document.id === focus)
     : content.documents;
   const publishedDocuments = documents.filter((document) => document.status === "published");
-  const pendingDocuments = documents.filter((document) => document.status === "pending");
 
   return (
     <main className="page documents-page">
@@ -804,27 +824,6 @@ function DocumentsPage({ focus }: { focus?: string }) {
           ))}
         </div>
       </section>
-
-      {!focus && pendingDocuments.length > 0 && (
-        <section className="pending-section" aria-labelledby="pending-title">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Pending publication</p>
-              <h2 id="pending-title">Not yet available</h2>
-              <p>
-                These records are listed for transparency. Do not treat them as verified until the
-                file and any official source are published.
-              </p>
-            </div>
-            <span className="section-heading__count">{pendingDocuments.length} pending</span>
-          </div>
-          <div className="pending-list">
-            {pendingDocuments.map((document) => (
-              <PendingDocumentCard document={document} key={document.id} />
-            ))}
-          </div>
-        </section>
-      )}
 
       {!focus && (
         <aside className="safety-note">
@@ -1018,6 +1017,7 @@ export default function App() {
       "#/documents": "Company Documents | BuySmart Trust Page",
       "#/documents/profile": "Company Profile | BuySmart Trust Page",
       "#/documents/policy": "Policies and Terms | BuySmart Trust Page",
+      "#/documents/tax-registration": "Tax Identification Certificate | BuySmart Trust Page",
       "#/socials": "Verified Socials | BuySmart Trust Page",
       "#/location": "Location | BuySmart Trust Page",
       "#/contact": "Contact | BuySmart Trust Page",
@@ -1039,6 +1039,7 @@ export default function App() {
 
   if (route === "#/documents/profile") return <DocumentsPage focus="profile" />;
   if (route === "#/documents/policy") return <DocumentsPage focus="policy" />;
+  if (route === "#/documents/tax-registration") return <DocumentsPage focus="tax-registration" />;
   if (route.startsWith("#/documents")) return <DocumentsPage />;
   if (route === "#/socials") return <SocialsPage />;
   if (route === "#/location") return <LocationPage />;

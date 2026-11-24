@@ -54,7 +54,7 @@ function GoogleBusinessPage() {
                   <strong>Phone:</strong> +234 810 013 0714
                 </p>
                 <p className="text-[color:var(--primary-charcoal,_#0D0D0D)]">
-                  <strong>Address:</strong> 6 Bassey Street, Egbeda, Lagos 100276, Nigeria
+                  <strong>Address:</strong> 18 Bassey Street, Egbeda, Lagos, Nigeria
                 </p>
               </div>
               {data?.reviews && (

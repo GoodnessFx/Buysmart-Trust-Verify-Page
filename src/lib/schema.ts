@@ -8,7 +8,7 @@ export const schemaOrgOrganization = {
   email: "buysmartprocurementlimited@gmail.com",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "6 Bassey Street, Egbeda",
+    streetAddress: "18 Bassey Street, Egbeda",
     addressLocality: "Lagos",
     addressCountry: "NG",
   },
