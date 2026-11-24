@@ -14,6 +14,7 @@
   "registration": {
     "cacNumber": "9613952",
     "registered": "CAC Nigeria",
+    "registeredName": "BUYSMART PROCUREMENT LTD",
     "incorporated": "16 June 2026",
     "address": "18 Bassey Street, Egbeda, Lagos, Nigeria",
     "phone": "0810 013 0714",
@@ -46,7 +47,6 @@
     "website": "https://www.buysmartprocurement.com",
     "cacSearch": "https://icrp.cac.gov.ng/public-search/",
     "cacWebsite": "https://www.cac.gov.ng/",
-    "cacStampVerification": "https://www.stampduty.gov.ng/verification",
     "taxVerification": "https://taxid.nrs.gov.ng/",
     "instagram": "https://www.instagram.com/buysmartprocurementltd/",
     "facebook": "https://www.facebook.com/buysmartprocurementltd",
@@ -79,23 +79,88 @@
       "url": "https://www.linkedin.com/company/buysmartprocurementltd/"
     }
   ],
+  "tour": [
+    {
+      "route": "#/",
+      "eyebrow": "Welcome",
+      "title": "Know what this page does",
+      "description": "Use this page to review public documents, open official sources and record your own checks before you transact.",
+      "target": "main h1"
+    },
+    {
+      "route": "#/documents",
+      "eyebrow": "Documents",
+      "title": "Choose a document",
+      "description": "Only complete documents are listed. Open or download a PDF, then follow the steps on its card.",
+      "target": ".document-section"
+    },
+    {
+      "route": "#/documents/cac-certificate",
+      "eyebrow": "CAC certificate",
+      "title": "Check the CAC certificate",
+      "description": "Open the official CAC search, compare the company name, RC number and incorporation date, then return to the certificate card.",
+      "target": "#cac-certificate"
+    },
+    {
+      "route": "#/documents/tax-registration",
+      "eyebrow": "Tax certificate",
+      "title": "Check the Tax ID",
+      "description": "Open the NRS Tax ID portal, choose Registered Organizations, use RC 9613952 and compare the Tax ID.",
+      "target": "#tax-registration"
+    },
+    {
+      "route": "#/socials",
+      "eyebrow": "Social accounts",
+      "title": "Compare social handles",
+      "description": "Open each account from this page and compare the full handle before you follow or message it.",
+      "target": ".channel-list"
+    },
+    {
+      "route": "#/location",
+      "eyebrow": "Location",
+      "title": "Confirm the office",
+      "description": "Use the registered address from the CAC and tax records, then open Google Maps for directions if needed.",
+      "target": ".contact-panel"
+    },
+    {
+      "route": "#/contact",
+      "eyebrow": "Contact",
+      "title": "Use the official contacts",
+      "description": "Request a quote through the listed WhatsApp number, phone or email. Compare the details before making payment.",
+      "target": ".contact-panel"
+    },
+    {
+      "route": "#/documents",
+      "eyebrow": "Finish",
+      "title": "Mark your checks",
+      "description": "After comparing an official record, return to its card and mark the check. Your confirmation is saved for this browser tab only.",
+      "target": ".document-section"
+    }
+  ],
   "documents": [
     {
-      "id": "profile",
-      "title": "Company Profile",
-      "purpose": "An overview of BuySmart, its procurement services, values and approach.",
-      "issuerName": "BuySmart Procurement Limited",
-      "issuerCode": "BS",
+      "id": "cac-certificate",
+      "title": "CAC Certificate of Incorporation",
+      "purpose": "Confirms the company's legal incorporation in Nigeria.",
+      "issuerName": "Corporate Affairs Commission, Nigeria",
+      "issuerCode": "CAC",
+      "issuerLogo": "https://www.cac.gov.ng/images/coat-of-arms.png",
       "status": "published",
-      "lastUpdated": "4 August 2026",
-      "file": "/documents/BUYSMART_COMPANY_PROFILE.pdf",
-      "thumbnail": "/images/profile-thumbnail.webp",
-      "fileSize": "275 KB",
-      "pages": 18,
-      "officialUrl": "",
-      "officialSourceName": "",
-      "verificationHint": "",
-      "details": [],
+      "lastUpdated": "16 June 2026",
+      "file": "/documents/BUYSMART_CAC_CERTIFICATE.pdf",
+      "thumbnail": "",
+      "fileSize": "900 KB",
+      "pages": 1,
+      "officialUrl": "https://icrp.cac.gov.ng/public-search/",
+      "officialSourceName": "Official CAC verification",
+      "verificationHint": "Search with the company name or RC 9613952, then compare the name, RC number and incorporation date.",
+      "details": [
+        { "label": "Registered name", "value": "BUYSMART PROCUREMENT LTD" },
+        { "label": "RC number", "value": "9613952" },
+        { "label": "Company type", "value": "Private company limited by shares" },
+        { "label": "Incorporated", "value": "16 June 2026" },
+        { "label": "Tax ID", "value": "2622478418022" }
+      ],
       "notice": ""
     },
     {
@@ -104,6 +169,7 @@
       "purpose": "Official taxpayer identification record for BuySmart Procurement Ltd.",
       "issuerName": "Nigeria Revenue Service",
       "issuerCode": "NRS",
+      "issuerLogo": "",
       "status": "published",
       "lastUpdated": "20 June 2026",
       "file": "/documents/BUYSMART_TAX_ID_CERTIFICATE.pdf",
@@ -123,11 +189,31 @@
       "notice": ""
     },
     {
+      "id": "profile",
+      "title": "Company Profile",
+      "purpose": "An overview of BuySmart, its procurement services, values and approach.",
+      "issuerName": "BuySmart Procurement Limited",
+      "issuerCode": "BS",
+      "issuerLogo": "",
+      "status": "published",
+      "lastUpdated": "4 August 2026",
+      "file": "/documents/BUYSMART_COMPANY_PROFILE.pdf",
+      "thumbnail": "/images/profile-thumbnail.webp",
+      "fileSize": "275 KB",
+      "pages": 18,
+      "officialUrl": "",
+      "officialSourceName": "",
+      "verificationHint": "",
+      "details": [],
+      "notice": ""
+    },
+    {
       "id": "policy",
       "title": "Company Policy",
       "purpose": "Terms covering orders, payments, refunds, shipping and delivery.",
       "issuerName": "BuySmart Procurement Limited",
       "issuerCode": "BS",
+      "issuerLogo": "",
       "status": "published",
       "lastUpdated": "9 July 2026",
       "file": "/documents/BuySmart-Company-Policy-updated.pdf",

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import content from "./content.json";
 
 type IconName =
@@ -18,8 +26,16 @@ type IconName =
   | "shield";
 
 type DocumentEntry = (typeof content.documents)[number];
+type TourContextValue = { startTour: () => void };
 
+const TourContext = createContext<TourContextValue | null>(null);
 const splashStorageKey = "buysmart-trust-splash-seen";
+
+function useTour() {
+  const context = useContext(TourContext);
+  if (!context) throw new Error("useTour must be used within TourContext");
+  return context;
+}
 
 function readSessionFlag(key: string) {
   try {
@@ -216,16 +232,133 @@ function Brand({ compact = false }: { compact?: boolean }) {
 }
 
 function Header() {
+  const { startTour } = useTour();
+
   return (
     <header className="site-header">
       <a href="#/" aria-label="BuySmart Trust home">
         <Brand compact />
       </a>
-      <div className="trust-label">
-        <Icon name="shield" size={16} />
-        <span>Official verification centre</span>
+      <div className="header-actions">
+        <button className="tour-button" type="button" onClick={startTour} aria-label="Take a tour">
+          <Icon name="globe" size={16} />
+          <span>Take a tour</span>
+        </button>
+        <div className="trust-label">
+          <Icon name="shield" size={16} />
+          <span>Official verification centre</span>
+        </div>
       </div>
     </header>
+  );
+}
+
+function TourPrompt() {
+  const { startTour } = useTour();
+
+  return (
+    <button className="tour-prompt" type="button" onClick={startTour}>
+      <span className="tour-prompt__icon">
+        <Icon name="globe" size={20} />
+      </span>
+      <span className="tour-prompt__copy">
+        <strong>New here?</strong>
+        <small>Take the short walkthrough</small>
+      </span>
+      <Icon name="arrow" size={18} />
+    </button>
+  );
+}
+
+function GuidedTour({
+  open,
+  route,
+  stepIndex,
+  onStepChange,
+  onClose,
+}: {
+  open: boolean;
+  route: string;
+  stepIndex: number;
+  onStepChange: (step: number) => void;
+  onClose: () => void;
+}) {
+  const heading = useRef<HTMLHeadingElement>(null);
+  const step = content.tour[stepIndex];
+
+  useEffect(() => {
+    if (!open) return;
+    if (route !== step.route) {
+      window.location.hash = step.route;
+      return;
+    }
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => {
+      const target = document.querySelector<HTMLElement>(step.target);
+      target?.scrollIntoView({
+        behavior: reducedMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      heading.current?.focus({ preventScroll: true });
+    }, 80);
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose, open, route, step]);
+
+  if (!open) return null;
+
+  const isLastStep = stepIndex === content.tour.length - 1;
+
+  return (
+    <aside className="guided-tour" role="region" aria-labelledby="guided-tour-title">
+      <div className="guided-tour__top">
+        <span>
+          Step {stepIndex + 1} of {content.tour.length}
+        </span>
+        <button
+          className="guided-tour__close"
+          type="button"
+          onClick={onClose}
+          aria-label="Close walkthrough"
+        >
+          &times;
+        </button>
+      </div>
+      <div className="guided-tour__progress" aria-hidden="true">
+        <span style={{ width: `${((stepIndex + 1) / content.tour.length) * 100}%` }} />
+      </div>
+      <p className="eyebrow">{step.eyebrow}</p>
+      <h2 id="guided-tour-title" ref={heading} tabIndex={-1}>
+        {step.title}
+      </h2>
+      <p className="guided-tour__description">{step.description}</p>
+      <div className="guided-tour__actions">
+        <button
+          className="button button--secondary"
+          type="button"
+          onClick={() => onStepChange(stepIndex - 1)}
+          disabled={stepIndex === 0}
+        >
+          Back
+        </button>
+        <button
+          className="button button--gold"
+          type="button"
+          onClick={() => (isLastStep ? onClose() : onStepChange(stepIndex + 1))}
+        >
+          {isLastStep ? "Finish" : "Next"} <Icon name="arrow" size={17} />
+        </button>
+      </div>
+    </aside>
   );
 }
 
@@ -332,6 +465,7 @@ function HomePage() {
             <Icon name="document" size={17} /> Browse documents
           </a>
         </div>
+        <TourPrompt />
         <div className="registration-badge">
           <Icon name="building" size={17} />
           <span>CAC Nigeria · RC {content.site.registrationNumber}</span>
@@ -459,7 +593,7 @@ function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
       <div className="verification-panel__copy">
         <span>Search with</span>
         <div className="copy-grid">
-          <CopyButton value={content.site.companyName} />
+          <CopyButton value={content.registration.registeredName} />
           <CopyButton value={content.site.registrationNumber} />
         </div>
         <p className="verification-panel__record">
@@ -500,14 +634,6 @@ function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
           {cacSearchHost}
         </a>
       </p>
-      <a
-        className="verification-panel__secondary"
-        href={content.links.cacStampVerification}
-        target="_blank"
-        rel="noreferrer"
-      >
-        Verify a CAC electronic stamp <Icon name="arrow" size={15} />
-      </a>
     </section>
   );
 }
@@ -706,7 +832,11 @@ function DocumentCard({ document }: { document: DocumentEntry }) {
           <img src={document.thumbnail} alt={`First page of ${document.title}`} loading="lazy" />
         ) : (
           <div className="document-preview__placeholder" aria-hidden="true">
-            <span>{document.issuerCode}</span>
+            {document.issuerLogo ? (
+              <img className="document-preview__issuer-logo" src={document.issuerLogo} alt="" />
+            ) : (
+              <span>{document.issuerCode}</span>
+            )}
             <strong>PDF</strong>
             <small>Public document</small>
           </div>
@@ -904,7 +1034,7 @@ function LocationPage() {
     <StandardPage
       eyebrow="Location"
       title="Find BuySmart"
-      description="Use the directions link below to navigate to the address supplied by BuySmart Procurement Limited."
+      description="Use the registered address from the company's CAC and tax records, then open Google Maps for directions."
     >
       <section className="contact-panel">
         <span className="contact-panel__icon">
@@ -995,11 +1125,25 @@ export default function App() {
     return initialRoute === "#/" && !readSessionFlag(splashStorageKey);
   });
   const restoreSplashFocus = useRef(false);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
 
   const completeSplash = useCallback(() => {
     writeSessionFlag(splashStorageKey, true);
     restoreSplashFocus.current = true;
     setShowSplash(false);
+  }, []);
+
+  const startTour = useCallback(() => {
+    setTourStep(0);
+    setTourOpen(true);
+  }, []);
+
+  const closeTour = useCallback(() => {
+    setTourOpen(false);
+    window.setTimeout(() => {
+      document.querySelector<HTMLButtonElement>(".tour-button")?.focus();
+    }, 0);
   }, []);
 
   useEffect(() => {
@@ -1017,6 +1161,7 @@ export default function App() {
       "#/documents": "Company Documents | BuySmart Trust Page",
       "#/documents/profile": "Company Profile | BuySmart Trust Page",
       "#/documents/policy": "Policies and Terms | BuySmart Trust Page",
+      "#/documents/cac-certificate": "CAC Certificate of Incorporation | BuySmart Trust Page",
       "#/documents/tax-registration": "Tax Identification Certificate | BuySmart Trust Page",
       "#/socials": "Verified Socials | BuySmart Trust Page",
       "#/location": "Location | BuySmart Trust Page",
@@ -1037,12 +1182,29 @@ export default function App() {
 
   if (showSplash) return <SplashScreen onComplete={completeSplash} />;
 
-  if (route === "#/documents/profile") return <DocumentsPage focus="profile" />;
-  if (route === "#/documents/policy") return <DocumentsPage focus="policy" />;
-  if (route === "#/documents/tax-registration") return <DocumentsPage focus="tax-registration" />;
-  if (route.startsWith("#/documents")) return <DocumentsPage />;
-  if (route === "#/socials") return <SocialsPage />;
-  if (route === "#/location") return <LocationPage />;
-  if (route === "#/contact") return <ContactPage />;
-  return <HomePage />;
+  let page: ReactNode;
+  if (route === "#/documents/profile") page = <DocumentsPage focus="profile" />;
+  else if (route === "#/documents/policy") page = <DocumentsPage focus="policy" />;
+  else if (route === "#/documents/cac-certificate")
+    page = <DocumentsPage focus="cac-certificate" />;
+  else if (route === "#/documents/tax-registration")
+    page = <DocumentsPage focus="tax-registration" />;
+  else if (route.startsWith("#/documents")) page = <DocumentsPage />;
+  else if (route === "#/socials") page = <SocialsPage />;
+  else if (route === "#/location") page = <LocationPage />;
+  else if (route === "#/contact") page = <ContactPage />;
+  else page = <HomePage />;
+
+  return (
+    <TourContext.Provider value={{ startTour }}>
+      {page}
+      <GuidedTour
+        open={tourOpen}
+        route={route}
+        stepIndex={tourStep}
+        onStepChange={setTourStep}
+        onClose={closeTour}
+      />
+    </TourContext.Provider>
+  );
 }
