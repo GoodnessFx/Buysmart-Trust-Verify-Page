@@ -9,6 +9,9 @@ import {
 } from "react";
 import content from "./content.json";
 
+const brandMarkUrl = `${import.meta.env.BASE_URL}images/buysmart-mark.webp`;
+const publicAssetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, "")}`;
+
 type IconName =
   | "arrow"
   | "building"
@@ -232,7 +235,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
       aria-describedby="splash-description"
     >
       <div className="splash__content">
-        <img className="splash__mark" src="/images/buysmart-mark.webp" alt="BuySmart logo" />
+        <img className="splash__mark" src={brandMarkUrl} alt="BuySmart logo" />
         <h1 id="splash-title">BuySmart</h1>
         <p id="splash-description">Official trust centre</p>
         <OfficialSourceLogos className="splash__official-logos" />
@@ -247,7 +250,7 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <div className={`brand ${compact ? "brand--compact" : ""}`}>
-      <img src="/images/buysmart-mark.webp" alt="" className="brand__mark" />
+      <img src={brandMarkUrl} alt="" className="brand__mark" />
       <div>
         <span className="brand__name">BuySmart</span>
         <span className="brand__wordmark">PROCUREMENT LIMITED</span>
@@ -853,13 +856,18 @@ function DocumentSteps({ document }: { document: DocumentEntry }) {
 
 function DocumentCard({ document }: { document: DocumentEntry }) {
   const hasOfficialRegistry = Boolean(document.officialUrl);
+  const fileUrl = publicAssetUrl(document.file);
 
   return (
     <article className="document-card" id={document.id}>
       <div className="document-preview">
-        <img className="document-preview__watermark" src="/images/buysmart-mark.webp" alt="" />
+        <img className="document-preview__watermark" src={brandMarkUrl} alt="" />
         {document.thumbnail ? (
-          <img src={document.thumbnail} alt={`First page of ${document.title}`} loading="lazy" />
+          <img
+            src={publicAssetUrl(document.thumbnail)}
+            alt={`First page of ${document.title}`}
+            loading="lazy"
+          />
         ) : (
           <div className="document-preview__placeholder" aria-hidden="true">
             {document.issuerLogo ? (
@@ -919,10 +927,10 @@ function DocumentCard({ document }: { document: DocumentEntry }) {
           {document.fileSize && <span>{document.fileSize}</span>}
         </div>
         <div className="document-actions">
-          <a className="button button--gold" href={document.file} target="_blank" rel="noreferrer">
+          <a className="button button--gold" href={fileUrl} target="_blank" rel="noreferrer">
             View PDF <Icon name="arrow" size={17} />
           </a>
-          <a className="button button--secondary" href={document.file} download>
+          <a className="button button--secondary" href={fileUrl} download>
             <Icon name="download" size={17} /> Download PDF
           </a>
         </div>

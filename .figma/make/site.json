@@ -5,7 +5,7 @@
     "index": true
   },
   "icons": {
-    "icon": "/favicon.png"
+    "icon": "./favicon.png"
   },
   "openGraph": {
     "image": "https://trust.buysmartprocurement.com/images/buysmart-social-preview.png"
