@@ -30,6 +30,7 @@ type TourContextValue = { startTour: () => void };
 
 const TourContext = createContext<TourContextValue | null>(null);
 const splashStorageKey = "buysmart-trust-splash-seen";
+const tourStorageKey = "buysmart-trust-tour-seen";
 
 function useTour() {
   const context = useContext(TourContext);
@@ -165,10 +166,36 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   );
 }
 
+function OfficialSourceLogos({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`official-logos ${className}`.trim()}
+      role="group"
+      aria-label="Official CAC and NRS verification sources"
+    >
+      <span>
+        <img
+          className="official-logos__mark official-logos__mark--cac"
+          src={content.links.cacLogo}
+          alt="CAC logo"
+        />
+        <small>CAC</small>
+      </span>
+      <span>
+        <img
+          className="official-logos__mark official-logos__mark--nrs"
+          src={content.links.nrsLogo}
+          alt="NRS logo"
+        />
+        <small>NRS</small>
+      </span>
+    </div>
+  );
+}
+
 function SplashScreen({ onComplete }: { onComplete: () => void }) {
   const [leaving, setLeaving] = useState(false);
   const enterButton = useRef<HTMLButtonElement>(null);
-  const startTimer = useRef<number | null>(null);
   const exitTimer = useRef<number | null>(null);
   const finishing = useRef(false);
 
@@ -183,8 +210,6 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     enterButton.current?.focus();
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    startTimer.current = window.setTimeout(finish, reducedMotion ? 700 : 1800);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") finish();
@@ -194,7 +219,6 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
-      if (startTimer.current) window.clearTimeout(startTimer.current);
       if (exitTimer.current) window.clearTimeout(exitTimer.current);
     };
   }, [finish]);
@@ -211,8 +235,9 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
         <img className="splash__mark" src="/images/buysmart-mark.webp" alt="BuySmart logo" />
         <h1 id="splash-title">BuySmart</h1>
         <p id="splash-description">Official trust centre</p>
+        <OfficialSourceLogos className="splash__official-logos" />
         <button className="splash__enter" type="button" onClick={finish} ref={enterButton}>
-          Enter <Icon name="arrow" size={18} />
+          Start tour <Icon name="arrow" size={18} />
         </button>
       </div>
     </div>
@@ -287,11 +312,7 @@ function GuidedTour({
   const step = content.tour[stepIndex];
 
   useEffect(() => {
-    if (!open) return;
-    if (route !== step.route) {
-      window.location.hash = step.route;
-      return;
-    }
+    if (!open || route !== step.route) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timer = window.setTimeout(() => {
@@ -341,6 +362,7 @@ function GuidedTour({
         {step.title}
       </h2>
       <p className="guided-tour__description">{step.description}</p>
+      <OfficialSourceLogos className="guided-tour__official-logos" />
       <div className="guided-tour__actions">
         <button
           className="button button--secondary"
@@ -546,7 +568,7 @@ function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
         <span className="verification-panel__icon">
           <img
             className="cac-logo"
-            src="https://www.cac.gov.ng/images/coat-of-arms.png"
+            src={content.links.cacLogo}
             alt="Corporate Affairs Commission logo"
           />
         </span>
@@ -761,7 +783,15 @@ function OfficialSourceLink({ document }: { document: DocumentEntry }) {
   return (
     <a className="official-source" href={href} target="_blank" rel="noreferrer">
       <span className="official-source__icon">
-        <Icon name="globe" size={20} />
+        {document.issuerLogo ? (
+          <img
+            className={`official-source__logo official-source__logo--${document.issuerCode.toLowerCase()}`}
+            src={document.issuerLogo}
+            alt=""
+          />
+        ) : (
+          <Icon name="globe" size={20} />
+        )}
       </span>
       <span className="official-source__copy">
         <small>
@@ -833,7 +863,11 @@ function DocumentCard({ document }: { document: DocumentEntry }) {
         ) : (
           <div className="document-preview__placeholder" aria-hidden="true">
             {document.issuerLogo ? (
-              <img className="document-preview__issuer-logo" src={document.issuerLogo} alt="" />
+              <img
+                className={`document-preview__issuer-logo document-preview__issuer-logo--${document.issuerCode.toLowerCase()}`}
+                src={document.issuerLogo}
+                alt=""
+              />
             ) : (
               <span>{document.issuerCode}</span>
             )}
@@ -1125,21 +1159,49 @@ export default function App() {
     return initialRoute === "#/" && !readSessionFlag(splashStorageKey);
   });
   const restoreSplashFocus = useRef(false);
+  const tourOpenRef = useRef(false);
+  const tourNavigationRoute = useRef<string | null>(null);
   const [tourOpen, setTourOpen] = useState(false);
   const [tourStep, setTourStep] = useState(0);
 
+  const navigateTour = useCallback((stepIndex: number) => {
+    const step = content.tour[stepIndex];
+    if (!step) return;
+
+    setTourStep(stepIndex);
+    if (window.location.hash === step.route) {
+      tourNavigationRoute.current = null;
+      setRoute(step.route);
+      return;
+    }
+
+    tourNavigationRoute.current = step.route;
+    window.location.hash = step.route;
+  }, []);
+
   const completeSplash = useCallback(() => {
+    const shouldStartTour = !readSessionFlag(tourStorageKey);
     writeSessionFlag(splashStorageKey, true);
+    writeSessionFlag(tourStorageKey, true);
     restoreSplashFocus.current = true;
     setShowSplash(false);
+    if (shouldStartTour) {
+      tourOpenRef.current = true;
+      setTourStep(0);
+      setTourOpen(true);
+    }
   }, []);
 
   const startTour = useCallback(() => {
-    setTourStep(0);
+    writeSessionFlag(tourStorageKey, true);
+    tourOpenRef.current = true;
     setTourOpen(true);
-  }, []);
+    navigateTour(0);
+  }, [navigateTour]);
 
   const closeTour = useCallback(() => {
+    tourOpenRef.current = false;
+    tourNavigationRoute.current = null;
     setTourOpen(false);
     window.setTimeout(() => {
       document.querySelector<HTMLButtonElement>(".tour-button")?.focus();
@@ -1148,7 +1210,16 @@ export default function App() {
 
   useEffect(() => {
     const onHashChange = () => {
-      setRoute(window.location.hash || "#/");
+      const nextRoute = window.location.hash || "#/";
+      if (tourOpenRef.current && tourNavigationRoute.current !== nextRoute) {
+        tourOpenRef.current = false;
+        tourNavigationRoute.current = null;
+        setTourOpen(false);
+      } else if (tourNavigationRoute.current === nextRoute) {
+        tourNavigationRoute.current = null;
+      }
+
+      setRoute(nextRoute);
       window.scrollTo({ top: 0, behavior: "auto" });
     };
 
@@ -1158,16 +1229,16 @@ export default function App() {
 
   useEffect(() => {
     const titles: Record<string, string> = {
-      "#/documents": "Company Documents | BuySmart Trust Page",
-      "#/documents/profile": "Company Profile | BuySmart Trust Page",
-      "#/documents/policy": "Policies and Terms | BuySmart Trust Page",
-      "#/documents/cac-certificate": "CAC Certificate of Incorporation | BuySmart Trust Page",
-      "#/documents/tax-registration": "Tax Identification Certificate | BuySmart Trust Page",
-      "#/socials": "Verified Socials | BuySmart Trust Page",
-      "#/location": "Location | BuySmart Trust Page",
-      "#/contact": "Contact | BuySmart Trust Page",
+      "#/documents": "Company Documents | BuySmart Trust Centre",
+      "#/documents/profile": "Company Profile | BuySmart Trust Centre",
+      "#/documents/policy": "Policies and Terms | BuySmart Trust Centre",
+      "#/documents/cac-certificate": "CAC Certificate of Incorporation | BuySmart Trust Centre",
+      "#/documents/tax-registration": "Tax Identification Certificate | BuySmart Trust Centre",
+      "#/socials": "Verified Socials | BuySmart Trust Centre",
+      "#/location": "Location | BuySmart Trust Centre",
+      "#/contact": "Contact | BuySmart Trust Centre",
     };
-    document.title = titles[route] || "BuySmart Trust Page";
+    document.title = titles[route] || "BuySmart Trust Centre | Official Documents & Verification";
   }, [route]);
 
   useEffect(() => {
@@ -1202,7 +1273,7 @@ export default function App() {
         open={tourOpen}
         route={route}
         stepIndex={tourStep}
-        onStepChange={setTourStep}
+        onStepChange={navigateTour}
         onClose={closeTour}
       />
     </TourContext.Provider>

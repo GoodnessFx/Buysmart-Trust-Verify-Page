@@ -1,10 +1,17 @@
 {
-  "description": "A mobile-friendly trust hub for BuySmart Procurement Limited, helping customers verify company details, view documents, find official links, and request quotes.",
+  "title": "BuySmart Trust Centre | Official Documents & Verification",
+  "description": "Review BuySmart Procurement Limited’s official documents, verify CAC and Tax ID records, and confirm trusted contact details before you transact.",
   "robots": {
-    "index": false
+    "index": true
+  },
+  "icons": {
+    "icon": "/favicon.png"
+  },
+  "openGraph": {
+    "image": "https://trust.buysmartprocurement.com/images/buysmart-social-preview.png"
   },
   "accessibility": {
-    "addBypassLinks": false,
+    "addBypassLinks": true,
     "ignoreReducedMotion": false
   }
 }

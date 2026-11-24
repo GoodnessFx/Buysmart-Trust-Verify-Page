@@ -47,7 +47,9 @@
     "website": "https://www.buysmartprocurement.com",
     "cacSearch": "https://icrp.cac.gov.ng/public-search/",
     "cacWebsite": "https://www.cac.gov.ng/",
+    "cacLogo": "https://www.cac.gov.ng/images/coat-of-arms.png",
     "taxVerification": "https://taxid.nrs.gov.ng/",
+    "nrsLogo": "https://taxid.nrs.gov.ng/assets/nrs-footer-bPXZ-3K-.svg",
     "instagram": "https://www.instagram.com/buysmartprocurementltd/",
     "facebook": "https://www.facebook.com/buysmartprocurementltd",
     "linkedin": "https://www.linkedin.com/company/buysmartprocurementltd/",
@@ -84,7 +86,7 @@
       "route": "#/",
       "eyebrow": "Welcome",
       "title": "Know what this page does",
-      "description": "Use this page to review public documents, open official sources and record your own checks before you transact.",
+      "description": "This short walkthrough shows how to review public documents, open official sources and record your own checks before you transact.",
       "target": "main h1"
     },
     {
@@ -131,10 +133,17 @@
     },
     {
       "route": "#/documents",
-      "eyebrow": "Finish",
+      "eyebrow": "Final check",
       "title": "Mark your checks",
       "description": "After comparing an official record, return to its card and mark the check. Your confirmation is saved for this browser tab only.",
       "target": ".document-section"
+    },
+    {
+      "route": "#/",
+      "eyebrow": "Tour complete",
+      "title": "You’re ready to explore",
+      "description": "You now know where to find documents, official verification sources and trusted contacts. Review the details before every transaction.",
+      "target": "main h1"
     }
   ],
   "documents": [
@@ -169,7 +178,7 @@
       "purpose": "Official taxpayer identification record for BuySmart Procurement Ltd.",
       "issuerName": "Nigeria Revenue Service",
       "issuerCode": "NRS",
-      "issuerLogo": "",
+      "issuerLogo": "https://taxid.nrs.gov.ng/assets/nrs-footer-bPXZ-3K-.svg",
       "status": "published",
       "lastUpdated": "20 June 2026",
       "file": "/documents/BUYSMART_TAX_ID_CERTIFICATE.pdf",
