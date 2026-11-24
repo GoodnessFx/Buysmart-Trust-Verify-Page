@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import content from "./content.json";
 
 type IconName =
@@ -18,6 +18,39 @@ type IconName =
   | "shield";
 
 type DocumentEntry = (typeof content.documents)[number];
+
+const splashStorageKey = "buysmart-trust-splash-seen";
+
+function readSessionFlag(key: string) {
+  try {
+    return window.sessionStorage.getItem(key) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function writeSessionFlag(key: string, value: boolean) {
+  try {
+    if (value) window.sessionStorage.setItem(key, "true");
+    else window.sessionStorage.removeItem(key);
+    return true;
+  } catch {
+    // The page still works when browser storage is unavailable.
+    return false;
+  }
+}
+
+function getUrlHost(url: string) {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
+function isCacSource(document: DocumentEntry) {
+  return Boolean(document.officialUrl) && getUrlHost(document.officialUrl) === "search.cac.gov.ng";
+}
 
 const icons: Record<IconName, ReactNode> = {
   arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
@@ -113,6 +146,78 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   );
 }
 
+function SplashScreen({ onComplete }: { onComplete: () => void }) {
+  const [leaving, setLeaving] = useState(false);
+  const enterButton = useRef<HTMLButtonElement>(null);
+  const startTimer = useRef<number | null>(null);
+  const exitTimer = useRef<number | null>(null);
+  const finishing = useRef(false);
+
+  const finish = useCallback(() => {
+    if (finishing.current) return;
+    finishing.current = true;
+    setLeaving(true);
+    exitTimer.current = window.setTimeout(onComplete, 450);
+  }, [onComplete]);
+
+  useEffect(() => {
+    enterButton.current?.focus();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    startTimer.current = window.setTimeout(finish, reducedMotion ? 900 : 2600);
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") finish();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+      if (startTimer.current) window.clearTimeout(startTimer.current);
+      if (exitTimer.current) window.clearTimeout(exitTimer.current);
+    };
+  }, [finish]);
+
+  return (
+    <div
+      className={`splash ${leaving ? "is-leaving" : ""}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="splash-title"
+      aria-describedby="splash-description"
+    >
+      <div className="splash__content">
+        <div className="splash__brand">
+          <img src="/images/buysmart-mark.webp" alt="" />
+          <div>
+            <span className="splash__name">BuySmart</span>
+            <span className="splash__wordmark">PROCUREMENT LIMITED</span>
+          </div>
+        </div>
+        <p className="splash__eyebrow">Official trust centre</p>
+        <h1 id="splash-title">Verify with confidence.</h1>
+        <p className="splash__description" id="splash-description">
+          Review our public documents, open the official source and complete your own check before
+          you transact.
+        </p>
+        <div className="splash__registration">
+          <Icon name="shield" size={17} />
+          CAC registered · RC {content.site.registrationNumber}
+        </div>
+        <div className="splash__progress" aria-hidden="true">
+          <span />
+        </div>
+        <button className="splash__enter" type="button" onClick={finish} ref={enterButton}>
+          Enter trust centre <Icon name="arrow" size={18} />
+        </button>
+        <small>Taking you to the trust centre…</small>
+      </div>
+    </div>
+  );
+}
+
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <div className={`brand ${compact ? "brand--compact" : ""}`}>
@@ -182,45 +287,33 @@ function HomePage() {
     external?: boolean;
   }> = [
     {
-      label: "Website",
-      detail: "Visit our official website",
+      label: "Company documents",
+      detail: "Open or download the published PDFs",
+      icon: "document",
+      href: "#/documents",
+    },
+    {
+      label: "Official website",
+      detail: "Visit buysmartprocurement.com",
       icon: "globe",
       href: content.links.website,
       external: true,
     },
     {
-      label: "Verified Documents",
-      detail: "Company records and official checks",
-      icon: "document",
-      href: "#/documents",
-    },
-    {
-      label: "Verified Socials",
-      detail: "Official accounts",
+      label: "Official social accounts",
+      detail: "Compare the handles before you follow",
       icon: "people",
       href: "#/socials",
     },
     {
-      label: "Google Business and Location",
-      detail: "Find our Lagos office",
+      label: "Office and location",
+      detail: "Find our Lagos office and directions",
       icon: "location",
       href: "#/location",
     },
     {
-      label: "Company Profile",
-      detail: "Who we are and what we do",
-      icon: "building",
-      href: "#/documents/profile",
-    },
-    {
-      label: "Policies and Terms",
-      detail: "Payments, refunds and delivery",
-      icon: "policy",
-      href: "#/documents/policy",
-    },
-    {
-      label: "Contact and Request a Quote",
-      detail: "Speak with our team",
+      label: "Contact BuySmart",
+      detail: "Request a quote or speak with our team",
       icon: "mail",
       href: "#/contact",
     },
@@ -231,114 +324,191 @@ function HomePage() {
       <Header />
       <section className="hero">
         <Brand />
-        <p className="eyebrow">BuySmart Trust Page</p>
+        <p className="eyebrow">Official trust centre</p>
         <h1>
           Verify BuySmart
           <br />
-          with confidence.
+          <span>with confidence.</span>
         </h1>
-        <p className="hero-company">{content.site.companyName}</p>
-        <p className="tagline">{content.site.tagline}</p>
-        <div className="registration-badge">
-          <Icon name="building" size={17} />
-          <span>Registered with CAC Nigeria, RC {content.site.registrationNumber}</span>
-          <a href={content.links.cacSearch} target="_blank" rel="noreferrer">
-            Verify
-          </a>
-        </div>
-      </section>
-
-      <section className="trust-intro">
-        <span className="trust-intro__icon">
-          <Icon name="shield" size={26} />
-        </span>
-        <div>
-          <p className="eyebrow">Before you transact</p>
-          <h2>Check the company. Open the source. Compare the details.</h2>
-          <p>
-            Use this official hub to review our public documents and open the independent source
-            whenever one is available.
-          </p>
-        </div>
-      </section>
-
-      <section className="quick-verify" aria-labelledby="quick-verify-title">
-        <div className="quick-verify__heading">
-          <span className="quick-verify__icon">
-            <Icon name="shield" size={24} />
-          </span>
-          <div>
-            <p className="eyebrow">Official verification</p>
-            <h2 id="quick-verify-title">Verify BuySmart in 3 clear steps</h2>
-          </div>
-        </div>
-        <ol className="quick-verify__steps">
-          <li>
-            <span>1</span>
-            <div>
-              <strong>Copy the exact company details</strong>
-              <div className="copy-grid quick-verify__copy">
-                <CopyButton value={content.site.companyName} />
-                <CopyButton value={content.site.registrationNumber} />
-              </div>
-            </div>
-          </li>
-          <li>
-            <span>2</span>
-            <div>
-              <strong>Open the official CAC search</strong>
-              <p>
-                Use{" "}
-                <a href={content.links.cacSearch} target="_blank" rel="noreferrer">
-                  search.cac.gov.ng
-                </a>{" "}
-                — the independent government source.
-              </p>
-            </div>
-          </li>
-          <li>
-            <span>3</span>
-            <div>
-              <strong>Compare before you transact</strong>
-              <p>Match the company name, RC number, status and incorporation date.</p>
-            </div>
-          </li>
-        </ol>
-        <div className="quick-verify__actions">
+        <p className="hero-purpose">
+          This is the official place to review BuySmart Procurement Limited’s public documents, open
+          trusted sources and complete your own check before you buy.
+        </p>
+        <div className="hero__actions">
           <a
             className="button button--gold"
             href={content.links.cacSearch}
             target="_blank"
             rel="noreferrer"
           >
-            Open official CAC verification <Icon name="arrow" size={17} />
+            Verify with CAC <Icon name="arrow" size={17} />
           </a>
-          <VerificationCheck label="I compared the details" />
+          <a className="button button--secondary" href="#/documents">
+            <Icon name="document" size={17} /> Browse documents
+          </a>
+        </div>
+        <div className="registration-badge">
+          <Icon name="building" size={17} />
+          <span>CAC Nigeria · RC {content.site.registrationNumber}</span>
+          <a href={content.links.cacSearch} target="_blank" rel="noreferrer">
+            search.cac.gov.ng
+          </a>
         </div>
       </section>
 
-      <nav aria-label="BuySmart links" className="link-list">
-        {links.map((link) => (
-          <a
-            className="link-card"
-            href={link.href}
-            key={link.label}
-            target={link.external ? "_blank" : undefined}
-            rel={link.external ? "noreferrer" : undefined}
-          >
-            <span className="link-card__icon">
-              <Icon name={link.icon} />
-            </span>
-            <span className="link-card__copy">
-              <strong>{link.label}</strong>
-              <small>{link.detail}</small>
-            </span>
-            <Icon name="arrow" />
-          </a>
-        ))}
-      </nav>
+      <section className="purpose-strip" aria-label="How this page helps you">
+        <div>
+          <Icon name="document" size={21} />
+          <span>
+            <strong>Review</strong>
+            Public company documents
+          </span>
+        </div>
+        <div>
+          <Icon name="globe" size={21} />
+          <span>
+            <strong>Verify</strong>
+            Open the official source
+          </span>
+        </div>
+        <div>
+          <Icon name="check" size={21} />
+          <span>
+            <strong>Confirm</strong>
+            Mark your own check
+          </span>
+        </div>
+      </section>
+
+      <CACVerificationPanel />
+
+      <section className="link-section" aria-labelledby="explore-title">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Trust centre</p>
+            <h2 id="explore-title">Explore BuySmart</h2>
+          </div>
+        </div>
+        <nav aria-label="BuySmart links" className="link-list">
+          {links.map((link) => (
+            <a
+              className="link-card"
+              href={link.href}
+              key={link.label}
+              target={link.external ? "_blank" : undefined}
+              rel={link.external ? "noreferrer" : undefined}
+            >
+              <span className="link-card__icon">
+                <Icon name={link.icon} />
+              </span>
+              <span className="link-card__copy">
+                <strong>{link.label}</strong>
+                <small>{link.detail}</small>
+              </span>
+              <Icon name="arrow" />
+            </a>
+          ))}
+        </nav>
+      </section>
       <Footer />
     </main>
+  );
+}
+
+function CACVerificationPanel({ compact = false }: { compact?: boolean }) {
+  const titleId = compact ? "documents-cac-title" : "home-cac-title";
+
+  return (
+    <section
+      className={`verification-panel ${compact ? "verification-panel--compact" : ""}`}
+      aria-labelledby={titleId}
+    >
+      <div className="verification-panel__heading">
+        <span className="verification-panel__icon">
+          <Icon name="shield" size={25} />
+        </span>
+        <div>
+          <p className="eyebrow">Official company check</p>
+          <h2 id={titleId}>Verify BuySmart with CAC</h2>
+          <p>Use the government’s public search, then compare the record yourself.</p>
+        </div>
+      </div>
+
+      {!compact && (
+        <ol className="verification-steps">
+          <li>
+            <span>1</span>
+            <div>
+              <strong>Copy our exact details</strong>
+              <p>Use the company name or RC number shown below.</p>
+            </div>
+          </li>
+          <li>
+            <span>2</span>
+            <div>
+              <strong>Open the official CAC search</strong>
+              <p>The independent government source is search.cac.gov.ng.</p>
+            </div>
+          </li>
+          <li>
+            <span>3</span>
+            <div>
+              <strong>Compare the record</strong>
+              <p>Match the name, RC number, status and incorporation date.</p>
+            </div>
+          </li>
+          <li>
+            <span>4</span>
+            <div>
+              <strong>Come back and mark your check</strong>
+              <p>Your confirmation is saved for this browser tab only.</p>
+            </div>
+          </li>
+        </ol>
+      )}
+
+      <div className="verification-panel__copy">
+        <span>Search with</span>
+        <div className="copy-grid">
+          <CopyButton value={content.site.companyName} />
+          <CopyButton value={content.site.registrationNumber} />
+        </div>
+      </div>
+
+      {compact && (
+        <p className="verification-panel__compact-guide">
+          Copy a detail, compare the official record, then return here and mark your check.
+        </p>
+      )}
+
+      <div className="verification-panel__actions">
+        <a
+          className="button button--gold"
+          href={content.links.cacSearch}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <span>
+            Open official CAC search
+            <small>search.cac.gov.ng</small>
+          </span>
+          <Icon name="arrow" size={18} />
+        </a>
+        <VerificationCheck
+          storageKey="buysmart-cac-check"
+          label="I compared the official record"
+          title="CAC comparison marked complete"
+          description="You compared the official record."
+        />
+      </div>
+      <p className="verification-panel__source">
+        <Icon name="globe" size={15} />
+        Independent government source ·{" "}
+        <a href={content.links.cacSearch} target="_blank" rel="noreferrer">
+          search.cac.gov.ng
+        </a>
+      </p>
+    </section>
   );
 }
 
@@ -367,8 +537,19 @@ function CopyButton({ value }: { value: string }) {
   );
 }
 
-function VerificationCheck({ label }: { label: string }) {
-  const [checked, setChecked] = useState(false);
+function VerificationCheck({
+  label,
+  storageKey,
+  title = "Your check is complete",
+  description = "This is your confirmation, not an independent verification by BuySmart.",
+}: {
+  label: string;
+  storageKey?: string;
+  title?: string;
+  description?: string;
+}) {
+  const [checked, setChecked] = useState(() => (storageKey ? readSessionFlag(storageKey) : false));
+  const [persisted, setPersisted] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const toastTimer = useRef<number | null>(null);
 
@@ -380,30 +561,53 @@ function VerificationCheck({ label }: { label: string }) {
 
   function markChecked() {
     setChecked(true);
+    setPersisted(storageKey ? writeSessionFlag(storageKey, true) : true);
     setShowToast(true);
     if (toastTimer.current) window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setShowToast(false), 4500);
   }
 
+  function resetCheck() {
+    setChecked(false);
+    setShowToast(false);
+    setPersisted(storageKey ? writeSessionFlag(storageKey, false) : true);
+  }
+
+  const persistenceMessage = !storageKey
+    ? "This check applies to the current page view."
+    : persisted
+      ? "Your check is saved for this tab only."
+      : "Browser storage is unavailable, so this check may not remain after a reload.";
+
   return (
     <div className="verification-check">
-      <button
-        className={`verification-check__button ${checked ? "is-complete" : ""}`}
-        type="button"
-        onClick={markChecked}
-        aria-pressed={checked}
-      >
-        <Icon name={checked ? "check" : "shield"} size={18} />
-        {checked ? "Details compared" : label}
-      </button>
+      <div className="verification-check__controls">
+        <button
+          className={`verification-check__button ${checked ? "is-complete" : ""}`}
+          type="button"
+          onClick={markChecked}
+          aria-pressed={checked}
+          disabled={checked}
+        >
+          <Icon name={checked ? "check" : "shield"} size={18} />
+          {checked ? "Checked by you" : label}
+        </button>
+        {checked && (
+          <button className="verification-check__undo" type="button" onClick={resetCheck}>
+            Undo
+          </button>
+        )}
+      </div>
       {showToast && (
         <div className="verification-toast" role="status" aria-live="polite">
           <span className="verification-toast__tick">
             <Icon name="check" size={34} />
           </span>
           <div>
-            <strong>Verification check complete</strong>
-            <p>You compared the details. Keep using the official source before you transact.</p>
+            <strong>{title}</strong>
+            <p>
+              {description} {persistenceMessage}
+            </p>
           </div>
         </div>
       )}
@@ -411,129 +615,144 @@ function VerificationCheck({ label }: { label: string }) {
   );
 }
 
-function DocumentCard({ document }: { document: DocumentEntry }) {
+function OfficialSourceLink({ document }: { document: DocumentEntry }) {
+  const isOfficialRegistry = Boolean(document.officialUrl);
+  const href = isOfficialRegistry ? document.officialUrl : content.links.website;
+  const sourceHost = isOfficialRegistry
+    ? getUrlHost(document.officialUrl)
+    : "buysmartprocurement.com";
+
   return (
-    <article
-      className={`document-card ${document.status === "pending" ? "document-card--pending" : ""}`}
-      id={document.id}
-    >
-      {document.thumbnail ? (
-        <div className="document-preview">
-          <img className="document-preview__watermark" src="/images/buysmart-mark.webp" alt="" />
-          <img src={document.thumbnail} alt={`First page of ${document.title}`} loading="lazy" />
-          <span className="page-count">{document.pages} pages</span>
+    <a className="official-source" href={href} target="_blank" rel="noreferrer">
+      <span className="official-source__icon">
+        <Icon name="globe" size={20} />
+      </span>
+      <span className="official-source__copy">
+        <small>
+          {isOfficialRegistry
+            ? isCacSource(document)
+              ? "Official CAC verification"
+              : "Official registry verification"
+            : "Official company website"}
+        </small>
+        <strong>{sourceHost}</strong>
+      </span>
+      <Icon name="arrow" size={19} />
+    </a>
+  );
+}
+
+function DocumentSteps({ document }: { document: DocumentEntry }) {
+  const hasOfficialRegistry = Boolean(document.officialUrl);
+  const cacSource = isCacSource(document);
+
+  return (
+    <ol className="document-steps" aria-label={`How to review ${document.title}`}>
+      <li>
+        <span>1</span>
+        <div>
+          <strong>Open or download the PDF</strong>
+          <p>Review all {document.pages} pages before you continue.</p>
         </div>
-      ) : (
-        <div className="document-placeholder">
-          <Icon name="document" size={30} />
-          <span>FILE PENDING</span>
+      </li>
+      <li>
+        <span>2</span>
+        <div>
+          <strong>
+            {hasOfficialRegistry ? "Check the official record" : "Compare the company details"}
+          </strong>
+          <p>
+            {hasOfficialRegistry
+              ? cacSource
+                ? "Search CAC with our name or RC number, then compare the record."
+                : "Open the official registry and compare the record."
+              : "Use our official website to compare the company name and contact details."}
+          </p>
         </div>
-      )}
+      </li>
+      <li>
+        <span>3</span>
+        <div>
+          <strong>Come back here</strong>
+          <p>Mark your check below after comparing the details.</p>
+        </div>
+      </li>
+    </ol>
+  );
+}
+
+function DocumentCard({ document }: { document: DocumentEntry }) {
+  const hasOfficialRegistry = Boolean(document.officialUrl);
+
+  return (
+    <article className="document-card" id={document.id}>
+      <div className="document-preview">
+        <img className="document-preview__watermark" src="/images/buysmart-mark.webp" alt="" />
+        <img src={document.thumbnail} alt={`First page of ${document.title}`} loading="lazy" />
+        <span className="document-preview__issuer">
+          <span>{document.issuerCode}</span>
+          {document.issuerName}
+        </span>
+        <span className="page-count">{document.pages} pages</span>
+      </div>
       <div className="document-card__body">
         <div className="badge-row">
-          <span className={`status-badge ${document.officialUrl ? "status-badge--official" : ""}`}>
-            {document.officialUrl ? "Verify on official site" : "Company document"}
-          </span>
-          {document.status === "pending" && <span className="pending-badge">File pending</span>}
+          <span className="status-badge status-badge--published">Published document</span>
+          {hasOfficialRegistry && (
+            <span className="status-badge status-badge--official">Official check</span>
+          )}
         </div>
         <h2>{document.title}</h2>
         <p className="document-purpose">{document.purpose}</p>
-        {document.details.length > 0 && (
-          <dl className="document-details">
-            {document.details.map((detail) => (
-              <div key={detail.label}>
-                <dt>{detail.label}</dt>
-                <dd>{detail.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
         {document.notice && <p className="document-notice">{document.notice}</p>}
-        <div className="verification-guide">
-          <div className="verification-guide__title">
-            <Icon name="shield" size={18} />
-            <strong>How to verify this document</strong>
-          </div>
-          {document.officialUrl ? (
-            <ul className="verification-guide__list">
-              <li>
-                <strong>Open the official CAC search.</strong>
-              </li>
-              <li>
-                <strong>Search:</strong> {content.site.companyName} or RC{" "}
-                {content.site.registrationNumber}.
-              </li>
-              <li>
-                <strong>Compare:</strong> name, RC number, status and date.
-              </li>
-            </ul>
-          ) : document.file ? (
-            <ul className="verification-guide__list">
-              <li>
-                <strong>Open the PDF above.</strong>
-              </li>
-              <li>
-                <strong>Confirm via the official website.</strong>
-              </li>
-              <li>
-                <strong>Match:</strong> company name, RC number and contact details.
-              </li>
-            </ul>
-          ) : (
-            <p>
-              <strong>Not yet verifiable.</strong> No public file or official source has been
-              supplied. Do not treat this record as verified.
-            </p>
-          )}
-        </div>
+        <DocumentSteps document={document} />
+        <OfficialSourceLink document={document} />
         <div className="file-meta">
-          <span>Last updated {document.lastUpdated}</span>
+          <span>Updated {document.lastUpdated}</span>
           {document.fileSize && <span>{document.fileSize}</span>}
         </div>
         <div className="document-actions">
-          {document.file && (
-            <>
-              <a
-                className="button button--gold"
-                href={document.file}
-                target="_blank"
-                rel="noreferrer"
-              >
-                View <Icon name="arrow" size={17} />
-              </a>
-              <a className="button button--secondary" href={document.file} download>
-                <Icon name="download" size={17} /> Download
-              </a>
-            </>
-          )}
+          <a className="button button--gold" href={document.file} target="_blank" rel="noreferrer">
+            View PDF <Icon name="arrow" size={17} />
+          </a>
+          <a className="button button--secondary" href={document.file} download>
+            <Icon name="download" size={17} /> Download PDF
+          </a>
+        </div>
+        <VerificationCheck
+          storageKey={`buysmart-document-${document.id}`}
+          label={
+            hasOfficialRegistry ? "I compared the official record" : "I reviewed this document"
+          }
+          title={hasOfficialRegistry ? "Official record compared" : "Document review complete"}
+          description={
+            hasOfficialRegistry
+              ? "You compared the official record."
+              : "You reviewed this company document."
+          }
+        />
+      </div>
+    </article>
+  );
+}
+
+function PendingDocumentCard({ document }: { document: DocumentEntry }) {
+  return (
+    <article className="pending-document" id={document.id}>
+      <span className="pending-document__mark" aria-hidden="true">
+        {document.issuerCode}
+      </span>
+      <div className="pending-document__body">
+        <div className="badge-row">
+          <span className="pending-badge">File pending</span>
           {document.officialUrl && (
-            <a
-              className="button button--secondary button--full"
-              href={document.officialUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Verify on official site <Icon name="arrow" size={17} />
-            </a>
-          )}
-          {!document.officialUrl && document.file && (
-            <a
-              className="button button--secondary button--full"
-              href={content.links.website}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Confirm via official website <Icon name="arrow" size={17} />
-            </a>
+            <span className="status-badge status-badge--official">Official check available</span>
           )}
         </div>
-        {(document.officialUrl || document.file) && (
-          <VerificationCheck
-            label={
-              document.officialUrl ? "I compared the official record" : "I confirmed this document"
-            }
-          />
-        )}
+        <h3>{document.title}</h3>
+        <p>{document.purpose}</p>
+        {document.notice && <p className="pending-document__notice">{document.notice}</p>}
+        {document.officialUrl && <OfficialSourceLink document={document} />}
       </div>
     </article>
   );
@@ -543,77 +762,69 @@ function DocumentsPage({ focus }: { focus?: string }) {
   const documents = focus
     ? content.documents.filter((document) => document.id === focus)
     : content.documents;
+  const publishedDocuments = documents.filter((document) => document.status === "published");
+  const pendingDocuments = documents.filter((document) => document.status === "pending");
 
   return (
     <main className="page documents-page">
       <Header />
       <div className="page-heading">
-        <p className="eyebrow">Trust centre</p>
+        {focus && (
+          <a className="header-back" href="#/documents">
+            &larr; All documents
+          </a>
+        )}
+        <p className="eyebrow">{focus ? "Published document" : "Documents and verification"}</p>
         <h1>{focus ? documents[0]?.title : "Company documents"}</h1>
         <p>
           {focus
             ? documents[0]?.purpose
-            : "Review our public company documents and independently check the records that have an official source."}
+            : "Open or download each published PDF, follow the official source where one is available, then return and mark your own check."}
         </p>
       </div>
 
-      {!focus && (
-        <section className="verify-box">
-          <div className="verify-box__heading">
-            <span>30 sec</span>
+      {!focus && <CACVerificationPanel compact />}
+
+      <section className="document-section" aria-label="Published company documents">
+        {!focus && (
+          <div className="section-heading">
             <div>
-              <p className="eyebrow">Independent check</p>
-              <h2>Verify us in 30 seconds</h2>
+              <p className="eyebrow">Available now</p>
+              <h2>Ready to review</h2>
             </div>
+            <span className="section-heading__count">
+              {publishedDocuments.length}{" "}
+              {publishedDocuments.length === 1 ? "document" : "documents"}
+            </span>
           </div>
-          <ol>
-            <li>
-              <div className="step-number">1</div>
-              <div>
-                <strong>Copy our name or RC number</strong>
-                <div className="copy-grid">
-                  <CopyButton value={content.site.companyName} />
-                  <CopyButton value={content.site.registrationNumber} />
-                </div>
-              </div>
-            </li>
-            <li>
-              <div className="step-number">2</div>
-              <div>
-                <strong>Open the official CAC public search</strong>
-                <p>
-                  Search on{" "}
-                  <a href={content.links.cacSearch} target="_blank" rel="noreferrer">
-                    search.cac.gov.ng
-                  </a>
-                  . If unavailable, visit{" "}
-                  <a href={content.links.cacWebsite} target="_blank" rel="noreferrer">
-                    cac.gov.ng
-                  </a>{" "}
-                  and choose Public Search.
-                </p>
-              </div>
-            </li>
-            <li>
-              <div className="step-number">3</div>
-              <div>
-                <strong>Compare the details</strong>
-                <p>
-                  Check the registered name, RC number, company status and incorporation date
-                  against this page.
-                </p>
-              </div>
-            </li>
-          </ol>
-          <VerificationCheck label="I compared the official record" />
+        )}
+        <div className="documents-list">
+          {publishedDocuments.map((document) => (
+            <DocumentCard document={document} key={document.id} />
+          ))}
+        </div>
+      </section>
+
+      {!focus && pendingDocuments.length > 0 && (
+        <section className="pending-section" aria-labelledby="pending-title">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Pending publication</p>
+              <h2 id="pending-title">Not yet available</h2>
+              <p>
+                These records are listed for transparency. Do not treat them as verified until the
+                file and any official source are published.
+              </p>
+            </div>
+            <span className="section-heading__count">{pendingDocuments.length} pending</span>
+          </div>
+          <div className="pending-list">
+            {pendingDocuments.map((document) => (
+              <PendingDocumentCard document={document} key={document.id} />
+            ))}
+          </div>
         </section>
       )}
-
-      <section className="documents-list" aria-label="Company documents">
-        {documents.map((document) => (
-          <DocumentCard document={document} key={document.id} />
-        ))}
-      </section>
 
       {!focus && (
         <aside className="safety-note">
@@ -780,6 +991,17 @@ function ContactPage() {
 
 export default function App() {
   const [route, setRoute] = useState(window.location.hash || "#/");
+  const [showSplash, setShowSplash] = useState(() => {
+    const initialRoute = window.location.hash || "#/";
+    return initialRoute === "#/" && !readSessionFlag(splashStorageKey);
+  });
+  const restoreSplashFocus = useRef(false);
+
+  const completeSplash = useCallback(() => {
+    writeSessionFlag(splashStorageKey, true);
+    restoreSplashFocus.current = true;
+    setShowSplash(false);
+  }, []);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -802,6 +1024,18 @@ export default function App() {
     };
     document.title = titles[route] || "BuySmart Trust Page";
   }, [route]);
+
+  useEffect(() => {
+    if (showSplash || !restoreSplashFocus.current) return;
+    const heading = document.querySelector<HTMLElement>("main h1");
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
+    restoreSplashFocus.current = false;
+  }, [showSplash]);
+
+  if (showSplash) return <SplashScreen onComplete={completeSplash} />;
 
   if (route === "#/documents/profile") return <DocumentsPage focus="profile" />;
   if (route === "#/documents/policy") return <DocumentsPage focus="policy" />;
