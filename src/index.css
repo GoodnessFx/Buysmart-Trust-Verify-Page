@@ -116,8 +116,10 @@
   animation: splash-copy-in 0.55s 0.3s ease both;
 }
 .splash__mark {
+  display: block;
   width: 108px;
   height: 108px;
+  margin-inline: auto;
   border-radius: 28px;
   object-fit: cover;
   box-shadow: 0 18px 45px rgb(199 150 26 / 18%);
