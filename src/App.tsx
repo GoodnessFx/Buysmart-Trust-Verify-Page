@@ -466,7 +466,6 @@ function HomePage() {
     <main className="page home-page">
       <Header />
       <section className="hero">
-        <Brand />
         <p className="eyebrow">Official trust centre</p>
         <h1>
           Verify BuySmart

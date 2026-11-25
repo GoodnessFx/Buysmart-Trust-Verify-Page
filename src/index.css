@@ -391,7 +391,7 @@
 }
 
 .hero {
-  padding: 46px 2px 30px;
+  padding: 24px 2px 30px;
   text-align: center;
 }
 .hero .brand {
@@ -1477,7 +1477,7 @@ a:focus-visible {
     padding: 0 28px;
   }
   .hero {
-    padding: 66px 0 38px;
+    padding: 38px 0 38px;
   }
   .hero__actions {
     max-width: 520px;
@@ -1587,7 +1587,7 @@ a:focus-visible {
     letter-spacing: 0.12em;
   }
   .hero {
-    padding-top: 34px;
+    padding-top: 20px;
   }
   .splash__mark {
     width: 92px;
